@@ -29,9 +29,8 @@
  */
 
 import {useEffect, useState} from "react";
-import {Categories} from "../assets/categories";
 import MenuBox from "../components/MenuBox";
-import {Flex, Grid, Heading} from "@chakra-ui/react";
+import {Flex, Grid, Heading, Text, VStack} from "@chakra-ui/react";
 import {motion} from "framer-motion";
 import {getCardsFromEnv} from "../utils/envCardsReader";
 
@@ -45,7 +44,7 @@ const stagger = {
 
 export default function HomePage() {
     const [categoriesListForSearch, setCategoriesListForSearch] =
-        useState(Categories);
+        useState([]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -79,19 +78,28 @@ export default function HomePage() {
                 }}
             >
                 {categoriesListForSearch.length === 0 ? (
-                    <Heading
-                        gridColumnStart={1}
-                        gridColumnEnd={3}
-                        fontSize={{sm: 11.95, md: 16, lg: 26, xl: 32}}
-                        w="100%"
-                        fontWeight={500}
+                    <VStack
+                        spacing={4}
+                        gridColumn="1 / -1"
+                        py={10}
+                        textAlign="center"
                     >
-                        Η αναζήτηση δεν επέστρεψε αποτελέσματα.
-                    </Heading>
-                ) : null}
-                {categoriesListForSearch.map(category => (
-                    <MenuBox category={category} key={category.title}/>
-                ))}
+                        <Heading
+                            fontSize={{sm: 20, md: 24, lg: 32}}
+                            fontWeight={600}
+                            color="primary"
+                        >
+                            No Links Configured
+                        </Heading>
+                        <Text fontSize={{sm: 14, md: 16, lg: 18}} color="gray.600">
+                            Please contact the administrator to configure links in the Vercel environment variables.
+                        </Text>
+                    </VStack>
+                ) : (
+                    categoriesListForSearch.map(category => (
+                        <MenuBox category={category} key={category.title}/>
+                    ))
+                )}
             </Grid>
         </Flex>
     );

@@ -1,14 +1,12 @@
 /**
  * Environment Cards Reader Utility
  *
- * Reads card data from environment variables (when deployed) or falls back to default categories
+ * Reads card data from environment variables ONLY - no fallback to hardcoded values
  */
 
-import { Categories } from '../assets/categories';
-
 /**
- * Get cards data from environment variable or default categories
- * @returns {Array} Array of card objects
+ * Get cards data from environment variable ONLY
+ * @returns {Array} Array of card objects (empty array if not configured)
  */
 export const getCardsFromEnv = () => {
     try {
@@ -27,8 +25,9 @@ export const getCardsFromEnv = () => {
         console.error('Error parsing cards from environment variable:', error);
     }
 
-    // Fall back to default categories if env variable is not set or invalid
-    return Categories;
+    // Return empty array if env variable is not set or invalid
+    console.warn('REACT_APP_CARDS_DATA environment variable is not set or is invalid. Please configure it in Vercel.');
+    return [];
 };
 
 /**
