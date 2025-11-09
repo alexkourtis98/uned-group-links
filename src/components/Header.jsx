@@ -28,20 +28,12 @@
  * /
  */
 
-import {Outlet, useLocation, useNavigate} from "react-router-dom";
+import {Outlet, useNavigate} from "react-router-dom";
 import {Box, Flex, Heading, useColorModeValue} from "@chakra-ui/react";
 import MenuButton from "./MenuButton";
-import {Categories} from "../assets/categories";
-
-function RouteDictionary(route) {
-    for (let i = 0; i < Categories.length; i++) {
-        if (Categories[i].route === route) return Categories[i].title;
-    }
-}
 
 export default function Header() {
     const navigate = useNavigate();
-    const loc = useLocation();
 
     const goToHomePage = () => {
         navigate("/");
