@@ -94,13 +94,8 @@ export default function MenuBox({category}) {
                         "light-mode-svg",
                         "dark-mode-svg"
                     )}`}
-                >
-                    {typeof iconSVG === 'string' ? (
-                        <div dangerouslySetInnerHTML={{ __html: iconSVG }} />
-                    ) : (
-                        iconSVG
-                    )}
-                </Box>
+                    dangerouslySetInnerHTML={{ __html: iconSVG }}
+                />
                 <Box
                     minW={{sm: "8px", md: "28px", lg: "32px"}}
                     maxW={{sm: "12px", md: "28px", lg: "32px"}}

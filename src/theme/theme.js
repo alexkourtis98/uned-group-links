@@ -10,12 +10,17 @@ const config = {
 
 const theme = extendTheme({
     colors: {
-        darkprimary: "#06273E",
-        primary: "#094169",
-        secondary: "#7FB6D5",
-        lightBlue: "#DFE6EB",
+        darkprimary: "#003C32",
+        primary: "#005447",
+        secondary: "#7FB89D",
+        lightGreen: "#E6F2EE",
+        lightBlue: "#E6F2EE", // Keep alias for backward compatibility
         dark: "#1d2021",
         light: "#FEFEFE",
+        // Dark mode green backgrounds
+        darkestGreen: "#001410",
+        darkerGreen: "#002920",
+        darkGreen: "#003C32",
     },
     fonts: {
         heading: `'Comfortaa', sans-serif`,
@@ -29,6 +34,13 @@ const theme = extendTheme({
         xl: "1200px",
         "2xl": "1600px",
         "3xl": "1920px",
+    },
+    styles: {
+        global: (props) => ({
+            body: {
+                bg: props.colorMode === 'dark' ? 'darkestGreen' : 'light',
+            },
+        }),
     },
     config
 });

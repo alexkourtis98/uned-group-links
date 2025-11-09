@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ReactDOMServer from "react-dom/server";
 import {
     Box,
     Button,
@@ -27,6 +28,26 @@ import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import CardEditor from "../components/CardEditor";
 import { Categories } from "../assets/categories";
 
+// Helper function to convert JSX icon to SVG string
+const convertJSXIconToString = (icon) => {
+    if (typeof icon === 'string') {
+        return icon; // Already a string
+    }
+
+    // If it's a JSX element, convert to string
+    try {
+        return ReactDOMServer.renderToStaticMarkup(icon);
+    } catch (error) {
+        console.error("Error converting JSX icon:", error);
+        // Return a default icon if conversion fails
+        return `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>`;
+    }
+};
+
 export default function SuperAdminDashboard() {
     const [cards, setCards] = useState([]);
     const [editingCard, setEditingCard] = useState(null);
@@ -48,8 +69,13 @@ export default function SuperAdminDashboard() {
             setCards(JSON.parse(storedCards));
         } else {
             // Initialize with default categories
-            setCards(Categories);
-            localStorage.setItem("adminCards", JSON.stringify(Categories));
+            // Convert all JSX icons to strings before storing
+            const categoriesWithStringIcons = Categories.map(category => ({
+                ...category,
+                iconSVG: convertJSXIconToString(category.iconSVG)
+            }));
+            setCards(categoriesWithStringIcons);
+            localStorage.setItem("adminCards", JSON.stringify(categoriesWithStringIcons));
         }
     }, [navigate]);
 
@@ -89,16 +115,22 @@ export default function SuperAdminDashboard() {
     };
 
     const handleSaveCard = (cardData) => {
+        // Ensure icon is a string before saving
+        const cardDataWithStringIcon = {
+            ...cardData,
+            iconSVG: convertJSXIconToString(cardData.iconSVG)
+        };
+
         let updatedCards;
 
         if (editingCard !== null && editingCard.index !== undefined) {
             // Edit existing card
             updatedCards = cards.map((card, i) =>
-                i === editingCard.index ? cardData : card
+                i === editingCard.index ? cardDataWithStringIcon : card
             );
         } else {
             // Add new card
-            updatedCards = [...cards, cardData];
+            updatedCards = [...cards, cardDataWithStringIcon];
         }
 
         setCards(updatedCards);
@@ -128,7 +160,7 @@ export default function SuperAdminDashboard() {
                     </HStack>
                 </HStack>
 
-                <Box bg="gray.800" borderRadius="lg" p={6} overflowX="auto">
+                <Box bg="darkerGreen" borderRadius="lg" p={6} overflowX="auto">
                     <Table variant="simple" colorScheme="whiteAlpha">
                         <Thead>
                             <Tr>
@@ -148,7 +180,9 @@ export default function SuperAdminDashboard() {
                                         <HStack spacing={2}>
                                             <IconButton
                                                 icon={<EditIcon />}
-                                                colorScheme="blue"
+                                                bg="primary"
+                                                color="white"
+                                                _hover={{ bg: "darkprimary" }}
                                                 size="sm"
                                                 onClick={() => handleEditCard(index)}
                                                 aria-label="Edit card"
@@ -171,7 +205,7 @@ export default function SuperAdminDashboard() {
 
             <Modal isOpen={isOpen} onClose={onClose} size="xl">
                 <ModalOverlay />
-                <ModalContent bg="gray.800">
+                <ModalContent bg="darkerGreen">
                     <ModalHeader color="white">
                         {editingCard ? "Edit Card" : "Add New Card"}
                     </ModalHeader>

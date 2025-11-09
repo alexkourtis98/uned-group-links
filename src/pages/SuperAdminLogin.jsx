@@ -57,7 +57,7 @@ export default function SuperAdminLogin() {
     return (
         <Container maxW="md" py={20}>
             <Box
-                bg="gray.800"
+                bg="darkerGreen"
                 p={8}
                 borderRadius="lg"
                 boxShadow="xl"
@@ -79,11 +79,11 @@ export default function SuperAdminLogin() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="admin@example.com"
-                                    bg="gray.700"
+                                    bg="darkGreen"
                                     color="white"
-                                    borderColor="gray.600"
-                                    _hover={{ borderColor: "gray.500" }}
-                                    _focus={{ borderColor: "blue.500" }}
+                                    borderColor="darkprimary"
+                                    _hover={{ borderColor: "primary" }}
+                                    _focus={{ borderColor: "secondary" }}
                                 />
                             </FormControl>
 
@@ -94,17 +94,19 @@ export default function SuperAdminLogin() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter password"
-                                    bg="gray.700"
+                                    bg="darkGreen"
                                     color="white"
-                                    borderColor="gray.600"
-                                    _hover={{ borderColor: "gray.500" }}
-                                    _focus={{ borderColor: "blue.500" }}
+                                    borderColor="darkprimary"
+                                    _hover={{ borderColor: "primary" }}
+                                    _focus={{ borderColor: "secondary" }}
                                 />
                             </FormControl>
 
                             <Button
                                 type="submit"
-                                colorScheme="blue"
+                                bg="primary"
+                                color="white"
+                                _hover={{ bg: "darkprimary" }}
                                 width="100%"
                                 isLoading={loading}
                                 loadingText="Logging in..."
