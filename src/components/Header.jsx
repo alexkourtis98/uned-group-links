@@ -28,7 +28,6 @@
  * /
  */
 
-import {useEffect, useState} from "react";
 import {Outlet, useLocation, useNavigate} from "react-router-dom";
 import {Box, Flex, Heading, useColorModeValue} from "@chakra-ui/react";
 import MenuButton from "./MenuButton";
@@ -43,10 +42,6 @@ function RouteDictionary(route) {
 export default function Header() {
     const navigate = useNavigate();
     const loc = useLocation();
-    const [currentName, setCurrentName] = useState(RouteDictionary(loc.pathname));
-    useEffect(() => {
-        setCurrentName(RouteDictionary(`${loc.pathname}`));
-    }, [loc]);
 
     const goToHomePage = () => {
         navigate("/");
