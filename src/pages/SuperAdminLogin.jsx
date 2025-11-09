@@ -12,9 +12,7 @@ import {
     VStack,
     useToast,
 } from "@chakra-ui/react";
-
-const ADMIN_EMAIL = "akourtisdev@gmail.com";
-const ADMIN_PASSWORD = "snickerS11?.?";
+import { getAdminCredentials } from "../utils/envCardsReader";
 
 export default function SuperAdminLogin() {
     const [email, setEmail] = useState("");
@@ -27,8 +25,11 @@ export default function SuperAdminLogin() {
         e.preventDefault();
         setLoading(true);
 
+        // Get admin credentials from environment variables
+        const adminCredentials = getAdminCredentials();
+
         // Simple authentication check
-        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        if (email === adminCredentials.email && password === adminCredentials.password) {
             // Set session token
             localStorage.setItem("adminToken", btoa(`${email}:${Date.now()}`));
 

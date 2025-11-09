@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReactDOMServer from "react-dom/server";
+import axios from "axios";
 import {
     Box,
     Button,
@@ -23,10 +24,15 @@ import {
     ModalBody,
     ModalCloseButton,
     useDisclosure,
+    Spinner,
+    Text,
+    Alert,
+    AlertIcon,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import CardEditor from "../components/CardEditor";
 import { Categories } from "../assets/categories";
+import { getCardsFromEnv, getAdminSecret } from "../utils/envCardsReader";
 
 // Helper function to convert JSX icon to SVG string
 const convertJSXIconToString = (icon) => {
@@ -51,6 +57,8 @@ const convertJSXIconToString = (icon) => {
 export default function SuperAdminDashboard() {
     const [cards, setCards] = useState([]);
     const [editingCard, setEditingCard] = useState(null);
+    const [isDeploying, setIsDeploying] = useState(false);
+    const [deploymentStatus, setDeploymentStatus] = useState(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const navigate = useNavigate();
     const toast = useToast();
@@ -63,10 +71,10 @@ export default function SuperAdminDashboard() {
             return;
         }
 
-        // Load cards from localStorage or use default
-        const storedCards = localStorage.getItem("adminCards");
-        if (storedCards) {
-            setCards(JSON.parse(storedCards));
+        // Load cards from environment variable (managed by Vercel)
+        const envCards = getCardsFromEnv();
+        if (envCards && envCards.length > 0) {
+            setCards(envCards);
         } else {
             // Initialize with default categories
             // Convert all JSX icons to strings before storing
@@ -100,13 +108,60 @@ export default function SuperAdminDashboard() {
         onOpen();
     };
 
+    // Function to save cards via Vercel API
+    const saveCardsToVercel = async (updatedCards) => {
+        setIsDeploying(true);
+        setDeploymentStatus("Updating cards and triggering deployment...");
+
+        try {
+            const adminSecret = getAdminSecret();
+
+            const response = await axios.post("/api/update-cards", {
+                cards: updatedCards,
+                adminSecret: adminSecret
+            });
+
+            if (response.data.success) {
+                setDeploymentStatus("Deployment started! Changes will be live in 1-2 minutes.");
+
+                toast({
+                    title: "Deployment Started",
+                    description: "Your changes are being deployed. The page will reload when complete.",
+                    status: "info",
+                    duration: 120000, // 2 minutes
+                    isClosable: true,
+                });
+
+                // Poll for deployment completion or auto-reload after 90 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 90000); // 90 seconds
+            }
+        } catch (error) {
+            console.error("Error saving cards:", error);
+            setDeploymentStatus(null);
+
+            toast({
+                title: "Error",
+                description: error.response?.data?.error || "Failed to save changes. Please try again.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setIsDeploying(false);
+        }
+    };
+
     const handleDeleteCard = (index) => {
         if (window.confirm("Are you sure you want to delete this card?")) {
             const updatedCards = cards.filter((_, i) => i !== index);
             setCards(updatedCards);
-            localStorage.setItem("adminCards", JSON.stringify(updatedCards));
+            saveCardsToVercel(updatedCards);
+
             toast({
                 title: "Card deleted",
+                description: "Deploying changes...",
                 status: "success",
                 duration: 2000,
                 isClosable: true,
@@ -134,11 +189,12 @@ export default function SuperAdminDashboard() {
         }
 
         setCards(updatedCards);
-        localStorage.setItem("adminCards", JSON.stringify(updatedCards));
+        saveCardsToVercel(updatedCards);
         onClose();
 
         toast({
             title: editingCard ? "Card updated" : "Card added",
+            description: "Deploying changes...",
             status: "success",
             duration: 2000,
             isClosable: true,
@@ -151,14 +207,40 @@ export default function SuperAdminDashboard() {
                 <HStack justify="space-between">
                     <Heading color="white">Admin Dashboard</Heading>
                     <HStack>
-                        <Button colorScheme="green" onClick={handleAddCard}>
+                        <Button
+                            colorScheme="green"
+                            onClick={handleAddCard}
+                            isDisabled={isDeploying}
+                        >
                             Add New Card
                         </Button>
-                        <Button colorScheme="red" onClick={handleLogout}>
+                        <Button
+                            colorScheme="red"
+                            onClick={handleLogout}
+                            isDisabled={isDeploying}
+                        >
                             Logout
                         </Button>
                     </HStack>
                 </HStack>
+
+                {/* Deployment Status Alert */}
+                {isDeploying && (
+                    <Alert status="info" variant="solid" borderRadius="md">
+                        <Spinner size="sm" mr={3} />
+                        <VStack align="start" spacing={0}>
+                            <Text fontWeight="bold">Deploying Changes...</Text>
+                            <Text fontSize="sm">{deploymentStatus}</Text>
+                        </VStack>
+                    </Alert>
+                )}
+
+                {deploymentStatus && !isDeploying && (
+                    <Alert status="success" variant="solid" borderRadius="md">
+                        <AlertIcon />
+                        <Text>{deploymentStatus}</Text>
+                    </Alert>
+                )}
 
                 <Box bg="darkerGreen" borderRadius="lg" p={6} overflowX="auto">
                     <Table variant="simple" colorScheme="whiteAlpha">
@@ -186,10 +268,12 @@ export default function SuperAdminDashboard() {
                                                 size="sm"
                                                 onClick={() => handleEditCard(index)}
                                                 aria-label="Edit card"
+                                                isDisabled={isDeploying}
                                             />
                                             <IconButton
                                                 icon={<DeleteIcon />}
                                                 colorScheme="red"
+                                                isDisabled={isDeploying}
                                                 size="sm"
                                                 onClick={() => handleDeleteCard(index)}
                                                 aria-label="Delete card"

@@ -33,6 +33,7 @@ import {Categories} from "../assets/categories";
 import MenuBox from "../components/MenuBox";
 import {Flex, Grid, Heading} from "@chakra-ui/react";
 import {motion} from "framer-motion";
+import {getCardsFromEnv} from "../utils/envCardsReader";
 
 const stagger = {
     inView: {
@@ -49,15 +50,9 @@ export default function HomePage() {
     useEffect(() => {
         window.scrollTo(0, 0);
 
-        // Load cards from localStorage if available (set by admin)
-        const adminCards = localStorage.getItem("adminCards");
-        if (adminCards) {
-            try {
-                setCategoriesListForSearch(JSON.parse(adminCards));
-            } catch (error) {
-                console.error("Error loading admin cards:", error);
-            }
-        }
+        // Load cards from environment variable (set by admin via Vercel API)
+        const cards = getCardsFromEnv();
+        setCategoriesListForSearch(cards);
     }, []);
     return (
         <Flex
