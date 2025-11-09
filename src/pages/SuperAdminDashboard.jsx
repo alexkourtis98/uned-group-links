@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ReactDOMServer from "react-dom/server";
 import axios from "axios";
 import {
     Box,
@@ -31,28 +30,7 @@ import {
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import CardEditor from "../components/CardEditor";
-import { Categories } from "../assets/categories";
 import { getCardsFromEnv, getAdminSecret } from "../utils/envCardsReader";
-
-// Helper function to convert JSX icon to SVG string
-const convertJSXIconToString = (icon) => {
-    if (typeof icon === 'string') {
-        return icon; // Already a string
-    }
-
-    // If it's a JSX element, convert to string
-    try {
-        return ReactDOMServer.renderToStaticMarkup(icon);
-    } catch (error) {
-        console.error("Error converting JSX icon:", error);
-        // Return a default icon if conversion fails
-        return `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M2 17L12 22L22 17" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M2 12L12 17L22 12" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>`;
-    }
-};
 
 export default function SuperAdminDashboard() {
     const [cards, setCards] = useState([]);
@@ -71,20 +49,9 @@ export default function SuperAdminDashboard() {
             return;
         }
 
-        // Load cards from environment variable (managed by Vercel)
+        // Load cards from environment variable ONLY (managed by Vercel)
         const envCards = getCardsFromEnv();
-        if (envCards && envCards.length > 0) {
-            setCards(envCards);
-        } else {
-            // Initialize with default categories
-            // Convert all JSX icons to strings before storing
-            const categoriesWithStringIcons = Categories.map(category => ({
-                ...category,
-                iconSVG: convertJSXIconToString(category.iconSVG)
-            }));
-            setCards(categoriesWithStringIcons);
-            localStorage.setItem("adminCards", JSON.stringify(categoriesWithStringIcons));
-        }
+        setCards(envCards); // Will be empty array if REACT_APP_CARDS_DATA not configured
     }, [navigate]);
 
     const handleLogout = () => {
@@ -252,34 +219,51 @@ export default function SuperAdminDashboard() {
                             </Tr>
                         </Thead>
                         <Tbody>
-                            {cards.map((card, index) => (
-                                <Tr key={index}>
-                                    <Td color="white">{card.title}</Td>
-                                    <Td color="gray.400" maxW="300px" isTruncated>
-                                        {card.route}
+                            {cards.length === 0 ? (
+                                <Tr>
+                                    <Td colSpan={3} textAlign="center" py={10}>
+                                        <VStack spacing={3}>
+                                            <Text color="white" fontSize="lg" fontWeight="600">
+                                                No Cards Configured
+                                            </Text>
+                                            <Text color="gray.400" fontSize="sm">
+                                                Click "Add New Card" to create your first card
+                                            </Text>
+                                            <Text color="gray.500" fontSize="xs" fontStyle="italic">
+                                                Note: Cards are stored in REACT_APP_CARDS_DATA environment variable
+                                            </Text>
+                                        </VStack>
                                     </Td>
-                                    <Td>
-                                        <HStack spacing={2}>
-                                            <IconButton
-                                                icon={<EditIcon />}
-                                                bg="primary"
-                                                color="white"
-                                                _hover={{ bg: "darkprimary" }}
-                                                size="sm"
-                                                onClick={() => handleEditCard(index)}
-                                                aria-label="Edit card"
-                                                isDisabled={isDeploying}
-                                            />
-                                            <IconButton
-                                                icon={<DeleteIcon />}
-                                                colorScheme="red"
-                                                isDisabled={isDeploying}
-                                                size="sm"
-                                                onClick={() => handleDeleteCard(index)}
-                                                aria-label="Delete card"
-                                            />
-                                        </HStack>
-                                    </Td>
+                                </Tr>
+                            ) : (
+                                cards.map((card, index) => (
+                                    <Tr key={index}>
+                                        <Td color="white">{card.title}</Td>
+                                        <Td color="gray.400" maxW="300px" isTruncated>
+                                            {card.route}
+                                        </Td>
+                                        <Td>
+                                            <HStack spacing={2}>
+                                                <IconButton
+                                                    icon={<EditIcon />}
+                                                    bg="primary"
+                                                    color="white"
+                                                    _hover={{ bg: "darkprimary" }}
+                                                    size="sm"
+                                                    onClick={() => handleEditCard(index)}
+                                                    aria-label="Edit card"
+                                                    isDisabled={isDeploying}
+                                                />
+                                                <IconButton
+                                                    icon={<DeleteIcon />}
+                                                    colorScheme="red"
+                                                    isDisabled={isDeploying}
+                                                    size="sm"
+                                                    onClick={() => handleDeleteCard(index)}
+                                                    aria-label="Delete card"
+                                                />
+                                            </HStack>
+                                        </Td>
                                 </Tr>
                             ))}
                         </Tbody>
