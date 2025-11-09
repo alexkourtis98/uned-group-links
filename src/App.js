@@ -31,6 +31,8 @@ import HomePage from "./pages/HomePage";
 import Header from "./components/Header";
 import {Route, Routes} from "react-router-dom";
 import AboutSettingsPage from "./pages/AboutSettingsPage";
+import SuperAdminLogin from "./pages/SuperAdminLogin";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
 function App() {
     return (
@@ -39,6 +41,8 @@ function App() {
                 <Route index element={<HomePage/>}/>
                 <Route path="/about" element={<AboutSettingsPage/>}/>
             </Route>
+            <Route path="/super-admin" element={<SuperAdminLogin/>}/>
+            <Route path="/super-admin/dashboard" element={<SuperAdminDashboard/>}/>
         </Routes>
     );
 }

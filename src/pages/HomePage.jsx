@@ -43,11 +43,21 @@ const stagger = {
 };
 
 export default function HomePage() {
-    const [categoriesListForSearch] =
+    const [categoriesListForSearch, setCategoriesListForSearch] =
         useState(Categories);
 
     useEffect(() => {
         window.scrollTo(0, 0);
+
+        // Load cards from localStorage if available (set by admin)
+        const adminCards = localStorage.getItem("adminCards");
+        if (adminCards) {
+            try {
+                setCategoriesListForSearch(JSON.parse(adminCards));
+            } catch (error) {
+                console.error("Error loading admin cards:", error);
+            }
+        }
     }, []);
     return (
         <Flex

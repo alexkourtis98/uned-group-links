@@ -95,7 +95,11 @@ export default function MenuBox({category}) {
                         "dark-mode-svg"
                     )}`}
                 >
-                    {iconSVG}
+                    {typeof iconSVG === 'string' ? (
+                        <div dangerouslySetInnerHTML={{ __html: iconSVG }} />
+                    ) : (
+                        iconSVG
+                    )}
                 </Box>
                 <Box
                     minW={{sm: "8px", md: "28px", lg: "32px"}}
