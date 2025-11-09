@@ -137,22 +137,16 @@ export default function SuperAdminDashboard() {
     };
 
     const handleSaveCard = (cardData) => {
-        // Ensure icon is a string before saving
-        const cardDataWithStringIcon = {
-            ...cardData,
-            iconSVG: convertJSXIconToString(cardData.iconSVG)
-        };
-
         let updatedCards;
 
         if (editingCard !== null && editingCard.index !== undefined) {
             // Edit existing card
             updatedCards = cards.map((card, i) =>
-                i === editingCard.index ? cardDataWithStringIcon : card
+                i === editingCard.index ? cardData : card
             );
         } else {
             // Add new card
-            updatedCards = [...cards, cardDataWithStringIcon];
+            updatedCards = [...cards, cardData];
         }
 
         setCards(updatedCards);
@@ -265,7 +259,7 @@ export default function SuperAdminDashboard() {
                                             </HStack>
                                         </Td>
                                 </Tr>
-                            ))}
+                            )))}
                         </Tbody>
                     </Table>
                 </Box>
